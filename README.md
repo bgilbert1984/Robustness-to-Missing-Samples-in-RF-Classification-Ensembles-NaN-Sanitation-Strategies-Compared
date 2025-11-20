@@ -1,4 +1,4 @@
-# Paper 13: NaN/Padding/Interpolation Robustness
+# NaN/Padding/Interpolation Robustness
 
 This paper systematically evaluates the robustness of RF ensemble classifiers to input corruption, specifically focusing on the impact of different NaN sanitation strategies.
 
@@ -139,3 +139,5 @@ make clean
   year={2025}
 }
 ```
+
+More at Spectrcyde https://172-234-197-23.ip.linodeusercontent.com/?p=4777
