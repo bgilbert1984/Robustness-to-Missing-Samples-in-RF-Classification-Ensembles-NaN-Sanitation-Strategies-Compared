@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Performance at 20% burst corruption on RadioML 2018.01A (8-model ensemble)}
+\begin{tabular}{lccc}
+\toprule
+Sanitizer & Top-1 Acc. (\%) & p95 Latency (ms) & PSD KL Div. \\
+\midrule
+Clean baseline  & \textemdash{} & \textemdash{} & 0.000 \\
+None (crash)    & ---       & ---       & ---   \\
+\texttt{nan\_to\_num} & 62.0 & 0.4 & \textemdash{} \\
+\texttt{zero\_pad}    & 60.0  & 0.3  & \textemdash{}  \\
+\textbf{\texttt{interp\_lin}} & \textbf{64.0} & 0.2 & \textbf{\textemdash{}} \\
+\bottomrule
+\end{tabular}
+\label{tab:burst-20pct}
+\end{table}

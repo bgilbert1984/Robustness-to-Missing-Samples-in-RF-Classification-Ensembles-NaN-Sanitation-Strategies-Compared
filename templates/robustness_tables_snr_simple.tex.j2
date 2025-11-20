@@ -1,0 +1,20 @@
+% Auto-generated; do not edit.
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Mode & Corr. & SNR Bin & Acc & Lat P50 (ms) & Lat P95 (ms) & PSD KL~$\tilde{}$ \\
+\midrule
+{% for r in rows -%}
+{{ r.mode.replace('_', '\\_') }} & {{ "{:.0f}".format(100*r.ratio) }}\% & {{ r.snr_bin }} &
+{{ "{:.3f}".format(r.accuracy) }} &
+{{ "{:.2f}".format(r.latency_p50_ms) }} &
+{{ "{:.2f}".format(r.latency_p95_ms) }} &
+{{ "{:.3f}".format(r.psd_kl_median) }} \\
+{% endfor -%}
+\bottomrule
+\end{tabular}
+\caption{SNR-stratified robustness metrics by corruption mode and ratio.}
+\label{tab:robustness_snr}
+\end{table}

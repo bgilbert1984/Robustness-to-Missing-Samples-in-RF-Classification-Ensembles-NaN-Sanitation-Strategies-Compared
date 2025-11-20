@@ -1,0 +1,38 @@
+% Auto-generated; do not edit.
+
+% ---- Global mask characteristics by corruption level ----
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Corruption & $\tilde{f}_\text{NaN}$ & Longest Run & Run Count & $n$ \\
+\midrule
+0\% & 0.002 & 1.000 & 1.000 & 50 \\
+10\% & 0.100 & 51.000 & 1.000 & 50 \\
+20\% & 0.199 & 102.000 & 1.000 & 50 \\
+\bottomrule
+\end{tabular}
+\caption{Median mask characteristics vs. corruption ratio (modes collapsed). $\tilde{f}_\text{NaN}$: median NaN fraction.}
+\label{tab:mask_global}
+\end{table}
+
+% ---- Per-SNR mask characteristics at focal corruption level ----
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+SNR bin @ 20\% & $\tilde{f}_\text{NaN}$ & Longest Run & Run Count & $n$ \\
+\midrule
+N/A & 0.199 & 102.000 & 1.000 & 14 \\
+{}[-10, -5) & 0.199 & 102.000 & 1.000 & 8 \\
+{}[-5, 0) & 0.199 & 102.000 & 1.000 & 7 \\
+{}[0, 5) & 0.199 & 102.000 & 1.000 & 7 \\
+{}[10, 15) & 0.199 & 102.000 & 1.000 & 7 \\
+{}[5, 10) & 0.199 & 102.000 & 1.000 & 7 \\
+\bottomrule
+\end{tabular}
+\caption{Median mask characteristics by SNR bin at the focal corruption level.}
+\label{tab:mask_snr_focal}
+\end{table}

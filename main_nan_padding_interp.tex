@@ -1,0 +1,153 @@
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage{graphicx,booktabs,siunitx,xurl,amsmath,amssymb}
+\usepackage[utf8]{inputenc}
+
+\makeatletter
+\newcommand{\safeinput}[1]{\IfFileExists{#1}{\input{#1}}{\typeout{[skip] missing #1}}}
+\makeatother
+
+\title{Robustness to Missing Samples in RF Classification Ensembles: NaN Sanitation Strategies Compared}
+\author{
+\IEEEauthorblockN{Benjamin Spectrcyde Gilbert}
+\IEEEauthorblockA{Experimental Solutions Implimentation\\
+Email: github.bgilbert1984@gmail.com}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We quantify the impact of input sanitation strategies—\texttt{nan\_to\_num}, zero-padding, and linear interpolation—on classification error and latency under controlled NaN corruption of IQ streams. We integrate sanitation hooks in temporal and spectral feature builders and systematically evaluate robustness across corruption ratios. Our analysis reveals that linear interpolation typically dominates at low-to-moderate corruption levels, while \texttt{nan\_to\_num} offers the fastest processing but introduces the most spectral distortion. We provide quantitative guidance for selecting appropriate sanitation strategies based on corruption characteristics and performance requirements.
+\end{abstract}
+
+\begin{IEEEkeywords}
+RF signal processing, robustness, input sanitation, ensemble methods, spectral analysis
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Radio frequency (RF) signal classification systems frequently encounter corrupted input data due to hardware failures, interference, or transmission errors. Missing samples, represented as NaN (Not a Number) values in digital signal processing pipelines, can propagate through feature extraction and classification stages, leading to degraded performance or complete system failures.
+
+This paper systematically evaluates the robustness of RF ensemble classifiers to input corruption, specifically focusing on the impact of different NaN sanitation strategies. We inject controlled corruption patterns into IQ data streams and measure the resulting effects on classification accuracy, processing latency, and spectral feature quality.
+
+\section{Methodology}
+
+\subsection{Input Sanitation Strategies}
+
+We evaluate four primary sanitation approaches:
+
+\begin{itemize}
+\item \textbf{None}: No sanitation—NaNs propagate through the system
+\item \textbf{nan\_to\_num}: Replace NaNs with zeros using \texttt{np.nan\_to\_num}
+\item \textbf{interp\_lin}: Linear interpolation of NaN spans
+\item \textbf{zero\_pad}: Direct replacement of NaNs with zero values
+\item \textbf{mask\_preserve}: Zero-fill NaNs while preserving mask information
+\end{itemize}
+
+\subsection{Corruption Model}
+
+We inject NaN corruption at ratios $\{0\%, 5\%, 10\%, 20\%, 40\%, 60\%\}$ using either:
+\begin{itemize}
+\item \textbf{Burst corruption}: Contiguous NaN spans (realistic for hardware failures)
+\item \textbf{Scattered corruption}: Random individual NaN samples
+\end{itemize}
+
+\subsection{Feature Extraction}
+
+Our system extracts both temporal and spectral features:
+
+\textbf{Temporal features}: Complex IQ samples are converted to [T, 2] or [T, 3] arrays (I, Q, and optionally mask channels) after sanitation and length normalization.
+
+\textbf{Spectral features}: Power spectral density (PSD) computed via windowed FFT with optional mask channel resampling to match spectral resolution.
+
+\subsection{Evaluation Metrics}
+
+We measure:
+\begin{itemize}
+\item \textbf{Classification accuracy}: Fraction of correctly classified signals
+\item \textbf{Processing latency}: p50 and p95 classification times
+\item \textbf{Spectral distortion}: KL divergence between corrupted and baseline PSDs
+\item \textbf{Mask statistics}: NaN fraction, longest run length, run count
+\end{itemize}
+
+\section{Results}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/error_vs_corruption.pdf}
+\caption{Classification error (1-accuracy) vs corruption ratio by sanitizer. Linear interpolation (\texttt{interp\_lin}) dominates at all but the highest corruption levels across corruption levels.}
+\label{fig:error_vs_corruption}
+\end{figure}
+
+\IfFileExists{figs/latency_vs_corruption.pdf}{
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figs/latency_vs_corruption.pdf}
+\caption{95th percentile latency vs corruption ratio. \texttt{nan\_to\_num} provides the fastest processing but at the cost of accuracy.}
+\label{fig:latency_vs_corruption}
+\end{figure}
+}{\typeout{[skip] figs/latency_vs_corruption.pdf}}
+
+Figure~\ref{fig:error_vs_corruption} shows classification error versus corruption ratio for different sanitation strategies. Linear interpolation (\texttt{interp\_lin}) demonstrates superior robustness, maintaining low error rates even at high corruption levels. The \texttt{nan\_to\_num} strategy shows rapid degradation beyond 20\% corruption, while direct zero-padding (\texttt{zero\_pad}) exhibits intermediate performance.
+
+Processing latency characteristics (Figure~\ref{fig:latency_vs_corruption}) reveal that \texttt{nan\_to\_num} provides the fastest processing across all corruption levels, with minimal computational overhead. Linear interpolation incurs moderate additional latency due to the interpolation computation, while mask preservation modes show the highest latency due to additional channel processing.
+
+\safeinput{tables/robustness_tables.tex}
+
+Table~\ref{tab:robustness_best} summarizes the best-performing sanitation strategy for each corruption level. At low corruption (0-10\%), the choice of strategy has minimal impact on accuracy. However, as corruption increases, linear interpolation consistently emerges as the optimal choice, balancing accuracy and reasonable processing latency.
+
+\section{SNR-Stratified Analysis}
+
+We extend our analysis to examine robustness across different signal-to-noise ratio (SNR) regimes, as corruption effects may vary with signal quality.
+
+\safeinput{tables/robustness_simple_snr.tex}
+
+The SNR-stratified results reveal that high-SNR signals (>10 dB) maintain good robustness across all sanitation strategies, while low-SNR signals (<-5 dB) show increased sensitivity to both corruption and sanitation choice. This suggests that adaptive sanitation strategies based on estimated signal quality could provide optimal performance.
+
+\section{Mask Statistics Analysis}
+
+Understanding the statistical properties of NaN corruption patterns helps inform sanitation strategy selection.
+
+\safeinput{tables/robustness_mask_tables.tex}
+
+Table~\ref{tab:mask_global} shows that our burst corruption model creates realistic corruption patterns with median NaN fractions matching the target corruption ratios. The longest run statistics indicate that significant contiguous corrupted spans occur even at moderate corruption levels, justifying the need for sophisticated interpolation strategies rather than simple zero-filling.
+
+\section{Discussion and Recommendations}
+
+Based on our comprehensive evaluation, we provide the following recommendations:
+
+\begin{enumerate}
+\item \textbf{Low corruption (0-10\%)}: Any sanitation strategy is adequate; choose \texttt{nan\_to\_num} for minimum latency
+\item \textbf{Moderate corruption (10-30\%)}: Linear interpolation provides the best accuracy/latency trade-off
+\item \textbf{High corruption (>30\%)}: Linear interpolation is essential; consider signal quality assessment before processing
+\item \textbf{Real-time applications}: \texttt{nan\_to\_num} offers acceptable performance up to 20\% corruption with minimal latency
+\item \textbf{Offline processing}: Always use linear interpolation for maximum accuracy
+\end{enumerate}
+
+The mask preservation approach shows promise for future work, enabling ML models to learn corruption-aware features by incorporating explicit NaN span information.
+
+\section{Conclusions}
+
+This study provides quantitative guidance for robust RF signal processing under input corruption. Our systematic evaluation across corruption ratios, SNR levels, and sanitation strategies demonstrates that linear interpolation offers superior robustness for most applications, while \texttt{nan\_to\_num} provides a fast alternative for real-time processing with acceptable corruption levels.
+
+The integration of sanitation hooks into feature extraction pipelines enables adaptive processing strategies that can optimize the accuracy/latency trade-off based on real-time corruption assessment. Future work will explore learned sanitation strategies that adapt to specific corruption patterns and signal characteristics.
+
+\section*{Acknowledgments}
+
+The authors thank the signal intelligence research community for valuable discussions on robust RF processing methodologies.
+
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{1}
+
+\bibitem{numpy}
+C. R. Harris \emph{et al.}, ``Array programming with NumPy,'' \emph{Nature}, vol. 585, no. 7825, pp. 357--362, 2020.
+
+\bibitem{scipy}
+P. Virtanen \emph{et al.}, ``SciPy 1.0: fundamental algorithms for scientific computing in Python,'' \emph{Nature Methods}, vol. 17, no. 3, pp. 261--272, 2020.
+
+\bibitem{sklearn}
+F. Pedregosa \emph{et al.}, ``Scikit-learn: machine learning in Python,'' \emph{J. Mach. Learn. Res.}, vol. 12, pp. 2825--2830, 2011.
+
+\end{thebibliography}
+
+\end{document}

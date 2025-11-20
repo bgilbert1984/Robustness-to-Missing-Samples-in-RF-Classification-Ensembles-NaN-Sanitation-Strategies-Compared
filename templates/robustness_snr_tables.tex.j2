@@ -1,0 +1,37 @@
+% Auto-generated; do not edit.
+
+{% for b in bins -%}
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+\multicolumn{5}{c}{\textbf{SNR bin:} {{ b.snr_bin }}} \\
+\midrule
+Corruption & Best Sanitizer & Error (\%) & p50 (ms) & p95 (ms) \\
+\midrule
+{% for r in b.best_by_ratio -%}
+{{ "{:.0f}".format(100*r.ratio) }}\% & \texttt{{{ r.best_mode }}} & {{ "{:.1f}".format(r.err_pct) }} & {{ "{:.2f}".format(r.p50) }} & {{ "{:.2f}".format(r.p95) }} \\
+{% endfor -%}
+\bottomrule
+\end{tabular}
+\caption{Best strategy per corruption ratio in SNR bin {{ b.snr_bin }}.}
+\label{tab:robustness_snr_{{ loop.index }}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+Sanitizer @ {{ "{:.0f}".format(100*focal) }}\% & p50 (ms) & p95 (ms) & Error (\%) \\
+\midrule
+{% for r in b.focal -%}
+\texttt{{{ r.mode }}} & {{ "{:.2f}".format(r.p50) }} & {{ "{:.2f}".format(r.p95) }} & {{ "{:.1f}".format(r.err_pct) }} \\
+{% endfor -%}
+\bottomrule
+\end{tabular}
+\caption{Latency/accuracy trade-offs at {{ "{:.0f}\\%".format(100*focal) }} corruption in SNR bin {{ b.snr_bin }}.}
+\label{tab:robustness_snr_focal_{{ loop.index }}}
+\end{table}
+{% endfor -%}

@@ -1,0 +1,30 @@
+% Auto-generated simple SNR table
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lccccc}
+\toprule
+Mode & Corruption & Acc (avg) & Latency P50 & Latency P95 & PSD KL \\
+\midrule
+none & 0\% & 0.321 & 0.13 & 0.20 & 0.000 \\
+none & 10\% & 0.321 & 0.14 & 0.20 & 0.000 \\
+none & 20\% & 0.321 & 0.14 & 0.21 & 0.000 \\
+\midrule
+nan\_to\_num & 0\% & 0.580 & 0.13 & 0.20 & 0.000 \\
+nan\_to\_num & 10\% & 0.580 & 0.14 & 0.23 & 0.000 \\
+nan\_to\_num & 20\% & 0.580 & 0.15 & 0.31 & 0.000 \\
+\midrule
+interp\_lin & 0\% & 0.601 & 0.13 & 0.16 & 0.000 \\
+interp\_lin & 10\% & 0.601 & 0.14 & 0.30 & 0.000 \\
+interp\_lin & 20\% & 0.601 & 0.15 & 0.24 & 0.000 \\
+\midrule
+zero\_pad & 0\% & 0.560 & 0.14 & 0.27 & 0.000 \\
+zero\_pad & 10\% & 0.560 & 0.15 & 0.19 & 0.000 \\
+zero\_pad & 20\% & 0.560 & 0.14 & 0.26 & 0.000 \\
+\midrule
+\midrule
+\bottomrule
+\end{tabular}
+\caption{Robustness by sanitization mode across corruption levels (SNR-averaged).}
+\label{tab:robustness-snr}
+\end{table}
